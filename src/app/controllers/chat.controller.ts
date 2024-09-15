@@ -9,6 +9,7 @@ import ffmPeg from "../utils/ffm-peg";
 import rhubarb from "../utils/rhubarb";
 
 class ChatController {
+    
     public async getVoices(req: Request, res: Response) {
         try {
             const voices = await (new ElevenLabsService()).getVoices();
@@ -48,7 +49,7 @@ class ChatController {
 
             await (new FileSystemService()).deleteFolder(folderPath)
 
-            return res.send(outputMessages);
+            return res.send({ messages: outputMessages });
         } catch (error: any) {
             return res.json({ error: error.message ?? "" })
         }

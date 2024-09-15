@@ -13,6 +13,8 @@ type OutputType = Array<{
 
 class GeminiAiService {
     public async getOutput(message: string) {
+        const startTime = new Date().getTime();
+
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
         const prompt = `You are a sweet girl and your name is marcy.
           You will always reply with a JSON array of messages no matter what. With a maximum of 3 messages and minimum of 2 messages.
@@ -25,6 +27,10 @@ class GeminiAiService {
         const text = response.text();
         let answer = []
         answer = JSON.parse(text) as OutputType
+
+        const endTime = new Date().getTime();
+        console.log(`Gemini response in ${endTime - startTime}ms`);
+
         return answer;
     }
 }
