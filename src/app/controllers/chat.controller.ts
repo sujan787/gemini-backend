@@ -23,7 +23,7 @@ class ChatController {
             message: z.string().max(200),
         }), req.body)
 
-        if (errors.length) return res.status(400).json({ errors: errors });
+        if (errors.length) return res.status(400).json({ errors });
 
         try {
             let outputMessages = await (new GeminiAiService()).getOutput(input.message);
@@ -42,11 +42,11 @@ class ChatController {
                 await ffmPeg.convertMp3ToWav(mp3FilePath, wavFilePath);
                 await rhubarb.generateLipSyncFromWav(wavFilePath, jsonFilePath);
 
-                console.log("hello")
-
                 message.audio = await (new FileSystemService()).audioFileToBase64(mp3FilePath);
                 message.lipsync = await (new FileSystemService()).readJsonTranscript(jsonFilePath);
             }
+
+            await (new FileSystemService()).deleteFolder(folderPath)
 
             return res.send(outputMessages);
         } catch (error: any) {

@@ -3,7 +3,7 @@ import os from 'os';
 import { exec } from 'child_process';
 
 const generateLipSyncFromWav = async (wavFilePath: string, jsonFilePath: string) => {
-    const startTime = new Date().getTime();  // Capture the start time here
+    const startTime = new Date().getTime();
     const basePath = path.join(__dirname, "../../../bin");
 
     try {

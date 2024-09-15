@@ -19,8 +19,7 @@ class GeminiAiService {
           Each message has a text, facialExpression, and animation property.
           The different facial expressions are: smile, sad, angry, surprised, funnyFace, and default.
           The different animations are: Talking_0, Talking_1, Talking_2, Crying, Laughing, Rumba, Idle, Terrified, and Angry. 
-          
-          the message is "${message}"`
+           this the message "${message}"`
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
