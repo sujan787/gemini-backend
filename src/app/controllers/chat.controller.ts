@@ -7,9 +7,10 @@ import FileSystemService from "../services/file-system.service";
 import storage from "../utils/storage";
 import ffmPeg from "../utils/ffm-peg";
 import rhubarb from "../utils/rhubarb";
+import upstash from "../utils/upstash";
 
 class ChatController {
-    
+
     public async getVoices(req: Request, res: Response) {
         try {
             const voices = await (new ElevenLabsService()).getVoices();
@@ -27,7 +28,15 @@ class ChatController {
         if (errors.length) return res.status(400).json({ errors });
 
         try {
-            let outputMessages = await (new GeminiAiService()).getOutput(input.message);
+            let outputMessages;
+            const result = await upstash.semanticCache.get(input.message);
+
+            if (result?.value) {
+                outputMessages = result.value;
+            } else {
+                outputMessages = await (new GeminiAiService()).getOutput(input.message);
+                await upstash.semanticCache.set(input.message, outputMessages);
+            }
 
             const folderPath = storage.path(`audios/${uuidv4()}`);
             await (new FileSystemService()).createFolder(folderPath);
@@ -47,7 +56,7 @@ class ChatController {
                 message.lipsync = await (new FileSystemService()).readJsonTranscript(jsonFilePath);
             }
 
-            await (new FileSystemService()).deleteFolder(folderPath)
+            (new FileSystemService()).deleteFolder(folderPath)
 
             return res.send({ messages: outputMessages });
         } catch (error: any) {
