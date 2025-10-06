@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  gemini-backend-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gemini-backend-service
+    ports:
+      - "9000:9000"
+    restart: always
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env.production
