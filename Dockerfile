@@ -1,28 +1,32 @@
 # Use an official Node runtime as a parent image
-FROM node:latest as build
+FROM node:latest AS build
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Install FFmpeg and sudo
+# Install dependencies for ffmpeg and sudo
 RUN apt-get update && \
     apt-get install -y ffmpeg sudo && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy package.json and package-lock.json to the container
+# Copy only package files first (for better caching)
 COPY package*.json ./
 
 # Install npm dependencies
 RUN npm install
-RUN npm run build
 
-# Copy the rest of the application code to the container
+# Copy the rest of the application code
 COPY . .
 
+# Ensure rhubarb binary is executable (do this after files are copied)
 RUN chmod +x ./bin/rhubarb-l/rhubarb
+
+# Build your project (important: do this AFTER copying source)
+RUN npm run build
 
 # Expose the port your app runs on
 EXPOSE 3000
 
 # Command to run your app
-CMD [ "npm", "start" ]
+CMD ["npm", "start"]
