@@ -27,18 +27,19 @@ class ChatController {
 
         if (errors.length) return res.status(400).json({ errors });
 
+        const folderPath = storage.path(`audios/${uuidv4()}`);
+
         try {
             let outputMessages;
             const result = await upstash.semanticCache.get(input.message);
 
-            if (result?.value) {
+            if (Object.keys(result?.value).length) {
                 outputMessages = result.value;
             } else {
                 outputMessages = await (new GeminiAiService()).getOutput(input.message);
                 await upstash.semanticCache.set(input.message, outputMessages);
             }
 
-            const folderPath = storage.path(`audios/${uuidv4()}`);
             await (new FileSystemService()).createFolder(folderPath);
 
             for (let i = 0; i < outputMessages.length; i++) {
@@ -48,18 +49,30 @@ class ChatController {
                 const wavFilePath = `${folderPath}/message_${i}.wav`;
                 const jsonFilePath = `${folderPath}/message_${i}.json`;
 
-                await (new ElevenLabsService()).convertTextToSpeech(message.text, mp3FilePath);
-                await ffmPeg.convertMp3ToWav(mp3FilePath, wavFilePath);
-                await rhubarb.generateLipSyncFromWav(wavFilePath, jsonFilePath);
+                const task1 = [
+                    await (new ElevenLabsService()).convertTextToSpeech(message.text, mp3FilePath),
+                    await ffmPeg.convertMp3ToWav(mp3FilePath, wavFilePath),
+                    await rhubarb.generateLipSyncFromWav(wavFilePath, jsonFilePath),
+                ]
 
-                message.audio = await (new FileSystemService()).audioFileToBase64(mp3FilePath);
-                message.lipsync = await (new FileSystemService()).readJsonTranscript(jsonFilePath);
+                await Promise.all(task1)
+
+                const task2 = [
+                    (new FileSystemService()).audioFileToBase64(mp3FilePath),
+                    (new FileSystemService()).readJsonTranscript(jsonFilePath)
+                ]
+
+                const [audio, lipsync] = await Promise.all(task2)
+
+                message.audio = audio;
+                message.lipsync = lipsync;
             }
 
             (new FileSystemService()).deleteFolder(folderPath)
 
             return res.send({ messages: outputMessages });
         } catch (error: any) {
+            (new FileSystemService()).deleteFolder(folderPath)
             return res.json({ error: error.message ?? "" })
         }
     }
