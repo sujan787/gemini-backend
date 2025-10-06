@@ -19,7 +19,7 @@ const bootProviders = (app: Express): void => {
 };
 
 const startServer = (app: Express): void => {
-    app.listen(PORT, () => {
+    app.listen(Number(PORT), '0.0.0.0', () => {
         console.log(`Server is running on port ${PORT}`);
     });
 };

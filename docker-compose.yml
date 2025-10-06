@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: gemini-backend-service
     ports:
-      - "9000:9000"
+      - "3000:3000"
     restart: always
     environment:
       NODE_ENV: production
