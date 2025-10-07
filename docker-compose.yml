@@ -5,11 +5,24 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: build   # backend build stage (if you need it)
     container_name: gemini-server
     ports:
-      - "3000:3000"
+      - "3000:3000"   # backend server port
     restart: always
     environment:
       NODE_ENV: production
     env_file:
       - .env
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx-stage  # correct stage name
+    container_name: nginx
+    depends_on:
+      - gemini-server
+    ports:
+      - "80:80"        # map Nginx port 80 to host
+    restart: always
