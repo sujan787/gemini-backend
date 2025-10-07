@@ -3,6 +3,7 @@
 # -----------------------
 FROM node:latest AS build
 
+# Set the working directory in the container
 WORKDIR /app
 
 # Install dependencies for ffmpeg and sudo
@@ -11,7 +12,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy package files for caching
+# Copy only package files first (for better caching)
 COPY package*.json ./
 
 # Install npm dependencies
@@ -20,19 +21,20 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Ensure rhubarb binary is executable
+# Ensure rhubarb binary is executable (do this after files are copied)
 RUN chmod +x ./bin/rhubarb-l/rhubarb
 
-# Build the project
+# Build your project (important: do this AFTER copying source)
 RUN npm run build
 
-# -----------------------
-# Stage 2: Nginx Runtime
-# -----------------------
+# Expose the port your app runs on
+EXPOSE 3000
+
+# Command to run your app
+CMD ["npm", "start"]
+
 FROM nginx:alpine AS nginx-stage
 
-# Copy built files from build stage to Nginx html directory
-COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf  
