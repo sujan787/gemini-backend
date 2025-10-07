@@ -31,12 +31,3 @@ EXPOSE 3000
 # Command to run your app
 CMD ["npm", "start"]
 
-
-FROM nginx:alpine AS nginx-stage
-
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf  
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
