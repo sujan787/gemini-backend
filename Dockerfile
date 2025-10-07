@@ -1,6 +1,4 @@
-# -----------------------
-# Stage 1: Build Stage
-# -----------------------
+# Use an official Node runtime as a parent image
 FROM node:latest AS build
 
 # Set the working directory in the container
@@ -33,8 +31,8 @@ EXPOSE 3000
 # Command to run your app
 CMD ["npm", "start"]
 
-FROM nginx:alpine AS nginx-stage
 
+FROM nginx:alpine AS nginx-stage
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf  
