@@ -15,14 +15,14 @@ services:
     env_file:
       - .env
 
-  # nginx:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #     target: nginx-stage  # correct stage name
-  #   container_name: nginx
-  #   depends_on:
-  #     - gemini-server
-  #   ports:
-  #     - "80:80"        # map Nginx port 80 to host
-  #   restart: always
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx-stage  # correct stage name
+    container_name: nginx
+    depends_on:
+      - gemini-server
+    ports:
+      - "80:80"        # map Nginx port 80 to host
+    restart: always
